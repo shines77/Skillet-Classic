@@ -451,6 +451,7 @@ end
 
 function Skillet:GetRecipe(id)
 	--DA.DEBUG(0,"GetRecipe("..tostring(id)..")")
+	--print("GetRecipe("..tostring(id)..")")
 	if id and id ~= 0 then 
 		if Skillet.data.recipeList[id] then
 			return Skillet.data.recipeList[id]
@@ -458,6 +459,7 @@ function Skillet:GetRecipe(id)
 		if Skillet.db.global.recipeDB[id] then
 			local recipeString = Skillet.db.global.recipeDB[id]
 			--DA.DEBUG(3,"recipeString= "..tostring(recipeString))
+			--print("recipeString= "..tostring(recipeString))
 			local tradeID, itemString, reagentString, toolString = string.split(" ",recipeString)
 			local itemID, numMade = 0, 1
 			local slot = nil
@@ -477,7 +479,7 @@ function Skillet:GetRecipe(id)
 					end
 				end
 			else
-				DA.DEBUG(0,"id= "..tostring(id)..", recipeString= "..tostring(recipeString))
+				--DA.DEBUG(0,"id= "..tostring(id)..", recipeString= "..tostring(recipeString))
 			end
 			Skillet.data.recipeList[id] = {}
 			Skillet.data.recipeList[id].spellID = tonumber(id)
@@ -500,7 +502,7 @@ function Skillet:GetRecipe(id)
 					end
 				end
 			else
-				DA.DEBUG(0,"id= "..tostring(id)..", recipeString= "..tostring(recipeString))
+				--DA.DEBUG(0,"id= "..tostring(id)..", recipeString= "..tostring(recipeString))
 			end
 			if toolString then
 				if toolString ~= "-" then
@@ -511,7 +513,7 @@ function Skillet:GetRecipe(id)
 					end
 				end
 			else
-				DA.DEBUG(0,"id= "..tostring(id)..", recipeString= "..tostring(recipeString))
+				--DA.DEBUG(0,"id= "..tostring(id)..", recipeString= "..tostring(recipeString))
 			end
 			return Skillet.data.recipeList[id]
 		end
@@ -578,9 +580,11 @@ function Skillet:GetSkill(player,trade,index)
 			local skillString = Skillet.db.realm.skillDB[player][trade][index]
 			if skillString then
 				local skill = {}
-				--DA.DEBUG(0,"skillString= '"..skillString.."'")
+				--DA.DEBUG(0,"skillString = '"..skillString.."'")
+				--print("skillString = '"..skillString.."'")
 				local skillData = { string.split("@", skillString) }
-				--DA.DEBUG(0,"skillData= "..DA.DUMP1(skillData))
+				--DA.DEBUG(0,"skillData = "..DA.DUMP1(skillData))
+				--print("skillData = "..DA.DUMP1(skillData))
 				local skillHeader = { string.split(" ", skillData[1]) }
 				if skillHeader[1] == "header" or skillHeader[1] == "subheader" then
 					skill.id = 0
@@ -593,6 +597,10 @@ function Skillet:GetSkill(player,trade,index)
 					skill.difficulty = DifficultyText[difficulty]
 					skill.color = skill_style_type[DifficultyText[difficulty]]
 					skill.tools = nil
+					skill.level = self:GetTradeSkillLevelByRecipeName(recipeID)
+					--print("index = "..index)
+					--print("recipeID = "..recipeID)
+					--print("difficulty = '"..difficulty.."'")
 					for i=2,#skillData do
 						local subData = { string.split("=",skillData[i]) }
 						if subData[1] == "cd" then
@@ -613,6 +621,7 @@ function Skillet:GetSkill(player,trade,index)
 		return Skillet.data.skillList[player][trade][index]
 	end
 	--DA.DEBUG(0,"GetSkill= "..DA.DUMP1(self.unknownRecipe))
+	--print("GetSkill = "..DA.DUMP1(self.unknownRecipe))
 	return self.unknownRecipe
 end
 
@@ -630,7 +639,7 @@ function Skillet:GetRecipeDataByTradeIndex(tradeID, index)
 		if recipeID then
 			local recipeData = self:GetRecipe(recipeID)
 			--DA.DEBUG(2,"GetRecipeDataByTradeIndex= "..DA.DUMP1(recipeData))
-			return recipeData, recipeData.spellID, recipeData.ItemID
+			return recipeData, recipeData.spellID, recipeData.itemID
 		end
 	end
 	return self.unknownRecipe

@@ -60,6 +60,7 @@ SkilletARL.lua
 TradeskillInfo.lua
 SkilletQueue.lua
 Upgrades.lua
+SkillLevelDB.lua
 SkillLevelData.lua
 RecipeGroups.lua
 Inventory.lua

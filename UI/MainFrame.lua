@@ -1104,9 +1104,18 @@ function Skillet:UpdateTradeSkillWindow()
 						levelText:SetText(level)
 					end
 				elseif self.db.profile.display_item_level and recipe.itemID then
+					--[[
 					local level = self:GetItemLevel(recipe.itemID)
 					if level and level > 1 then
 						levelText:SetText(level)
+					end
+					--]]
+					local skillLevel = self:GetTradeSkillLevelByItemID(recipe.itemID)
+					if skillLevel and skillLevel >= 1 then
+						local skillLevelStr = string.format("[%3d]", skillLevel)
+						levelText:SetWidth(38)
+						levelText:SetTextColor(skill_color.r, skill_color.g, skill_color.b, textAlpha)
+						levelText:SetText(skillLevelStr)
 					end
 				end
 				text = (self:RecipeNamePrefix(skill, recipe) or "") .. (skill.name or "")

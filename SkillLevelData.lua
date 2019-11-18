@@ -48,7 +48,7 @@ local skillLevels = {
 	[0] = "orange/yellow/green/gray"
 }
 
-function Skillet:GetTradeSkillLevels(spellID)
+function Skillet:GetTradeSkillLevels(spellID, itemID)
 	--DA.DEBUG(0,"GetTradeSkillLevels("..tostring(spellID)..")")
 	local a,b,c,d
 	if spellID then 
@@ -102,6 +102,12 @@ function Skillet:GetTradeSkillLevels(spellID)
 			end
 		end
 	end
+
+	if itemID then
+		a, b, c, d = self:GetTradeSkillLevelByItemID(itemID)
+		return a, b, c, d
+	end
+	
 	return 0, 0, 0, 0 
 end
 

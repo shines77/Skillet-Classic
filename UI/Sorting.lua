@@ -40,7 +40,7 @@ local function sort_recipe_by_name(tradeskill, a, b)
 	end
 end
 
-local function sort_recipe_by_skill_level(tradeskill, a, b)
+local function sort_recipe_by_skill_difficulty(tradeskill, a, b)
 	while a.subGroup and #a.subGroup.entries>0 do
 		a = a.subGroup.entries[1]
 	end
@@ -56,20 +56,58 @@ local function sort_recipe_by_skill_level(tradeskill, a, b)
 		rightDifficulty = skill_style_type[b.skillData.difficulty].level
 	end
 	if leftDifficulty == rightDifficulty then
-		local left = Skillet:GetTradeSkillLevels(a.spellID)
-		local right = Skillet:GetTradeSkillLevels(b.spellID)
-		if left == right then
-			if a.subGroup and b.subGroup then
-				return #a.subGroup.entries < #b.subGroup.entries
+		if a.recipeData and b.recipeData then
+			local left = Skillet:GetTradeSkillLevels(a.spellID, a.recipeData.itemID)
+			local right = Skillet:GetTradeSkillLevels(b.spellID, b.recipeData.itemID)
+			if left == right then
+				if a.subGroup and b.subGroup then
+					return #a.subGroup.entries < #b.subGroup.entries
+				else
+					return (a.skillIndex or 0) < (b.skillIndex or 0)
+				end
 			else
-				return (a.skillIndex or 0) < (b.skillIndex or 0)
+				return left > right
 			end
-		else
-			return left > right
 		end
-	else
-		return leftDifficulty > rightDifficulty
 	end
+	return leftDifficulty > rightDifficulty
+end
+
+local function sort_recipe_by_skill_level(tradeskill, a, b)
+	while a.subGroup and #a.subGroup.entries>0 do
+		a = a.subGroup.entries[1]
+	end
+	while b.subGroup and #b.subGroup.entries>0 do
+		b = b.subGroup.entries[1]
+	end
+	local leftLevel = 0
+	local rightLevel = 0
+	if a.skillData and a.skillData.level then
+		leftLevel = a.skillData.level
+		--print("a.skillData.level = "..a.skillData.level)
+	end
+	if b.skillData and b.skillData.level then
+		rightLevel = b.skillData.level
+		--print("b.skillData.level = "..b.skillData.level)
+	end
+	if leftLevel == rightLevel then
+		if a.recipeData and b.recipeData then
+			local left  = Skillet:GetTradeSkillLevels(a.spellID, a.recipeData.itemID)
+			local right = Skillet:GetTradeSkillLevels(b.spellID, b.recipeData.itemID)
+			--print("a.spellID = "..a.spellID..", a.itemID = "..tostring(a.recipeData.itemID)..", left = "..left)
+			--print("b.spellID = "..b.spellID..", b.itemID = "..tostring(a.recipeData.itemID)..", right = "..right)
+			if left == right then
+				if a.subGroup and b.subGroup then
+					return #a.subGroup.entries < #b.subGroup.entries
+				else
+					return (a.skillIndex or 0) < (b.skillIndex or 0)
+				end
+			else
+				return left > right
+			end
+		end		
+	end
+	return leftLevel > rightLevel
 end
 
 local function sort_recipe_by_item_level(tradeskill, a, b)
@@ -387,7 +425,7 @@ function Skillet:SortAndFilterRecipes() -- SAFR:
 				if skill.id ~= 0 then							-- not a header
 					if not SkillIsFilteredOut(i) then		-- skill is not filtered out
 						button_index = button_index + 1
-						sortedSkillList[button_index] = {["recipeID"] = skill.id, ["spellID"] = recipe.spellID, ["name"] = recipe.name, ["skillIndex"] = i, ["recipeData"] = recipe, ["skillData"] = skill, ["depth"] = 0}
+						sortedSkillList[button_index] = {["recipeID"] = skill.id, ["spellID"] = recipe.spellID, ["name"] = recipe.name, ["skillIndex"] = i, ["skillLevel"] = skill.level, ["recipeData"] = recipe, ["skillData"] = skill, ["depth"] = 0}
 					elseif i == Skillet.selectedSkill then
 --
 -- if filtered out and selected - deselect
@@ -469,10 +507,10 @@ function Skillet:InitializeSorting()
 --
 	table.insert(sorters, 1, {["name"]=L["None"], ["sorter"]=sort_recipe_by_index})
 	table.insert(sorters, 2, {["name"]=L["By Name"], ["sorter"]=sort_recipe_by_name})
-	table.insert(sorters, 3, {["name"]=L["By Difficulty"], ["sorter"]=sort_recipe_by_skill_level})
---	table.insert(sorters, 4, {["name"]=L["By Skill Level"], ["sorter"]=sort_recipe_by_skill_level})
-	table.insert(sorters, 4, {["name"]=L["By Item Level"], ["sorter"]=sort_recipe_by_item_level})
-	table.insert(sorters, 5, {["name"]=L["By Quality"], ["sorter"]=sort_recipe_by_item_quality})
+	table.insert(sorters, 3, {["name"]=L["By Difficulty"], ["sorter"]=sort_recipe_by_skill_difficulty})
+	table.insert(sorters, 4, {["name"]=L["By Skill Level"], ["sorter"]=sort_recipe_by_skill_level})
+	table.insert(sorters, 5, {["name"]=L["By Item Level"], ["sorter"]=sort_recipe_by_item_level})
+	table.insert(sorters, 6, {["name"]=L["By Quality"], ["sorter"]=sort_recipe_by_item_quality})
 	recipe_sort_method = sort_recipe_by_index
 	SkilletSortAscButton:SetScript("OnClick", function()
 --
